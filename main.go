@@ -1,16 +1,23 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"sync/atomic"
+
+	"github.com/allscorpion/chirpy/internal/database"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 type apiConfig struct {
 	fileserverHits atomic.Int32
+	dbQueries *database.Queries
 }
 
 func (cfg *apiConfig) middlewareMetricsInc(next http.Handler) http.Handler {
@@ -129,8 +136,27 @@ func handleValidateChirp(w http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
+	err := godotenv.Load();
+
+	if err != nil {
+		log.Fatal("failed to load env");
+	}
+
+	dbURL := os.Getenv("DB_URL");
+
+	db, err := sql.Open("postgres", dbURL)
+
+	if err != nil {
+		log.Fatal("failed to open sql connection");
+	}
+
+	dbQueries := database.New(db)
+
 	serveMux := http.NewServeMux();
-	config := apiConfig{fileserverHits: atomic.Int32{}}
+	config := apiConfig{
+		fileserverHits: atomic.Int32{}, 
+		dbQueries: dbQueries,
+	};
 
 	serveMux.Handle("/app/", config.middlewareMetricsInc(http.StripPrefix("/app", http.FileServer(http.Dir(".")))));
 	serveMux.HandleFunc("GET /api/healthz", healthCheck);
@@ -143,7 +169,7 @@ func main() {
 		Addr: ":8080",
 	}
 
-	err := server.ListenAndServe()
+	err = server.ListenAndServe()
 
 	if err != nil {
 		log.Fatalf("failed to start server, %v", err)
