@@ -10,6 +10,14 @@ import (
 	"github.com/google/uuid"
 )
 
+type ChirpParsed struct {
+		ID        uuid.UUID `json:"id"`
+		CreatedAt time.Time `json:"created_at"`
+		UpdatedAt time.Time	`json:"updated_at"`
+		Body      string `json:"body"`
+		UserID    uuid.UUID `json:"user_id"`
+	}
+
 func getCleanBody(body string) string {
 	invalidWords := map[string]struct{}{
 		"kerfuffle": {},
@@ -29,7 +37,7 @@ func getCleanBody(body string) string {
 	return strings.Join(words, " ");
 }
 
-func (cfg *apiConfig) handleChirps(w http.ResponseWriter, req *http.Request) {
+func (cfg *apiConfig) handleChirpsCreate(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close();
 	type parameters struct {
         Body string `json:"body"`
@@ -55,17 +63,12 @@ func (cfg *apiConfig) handleChirps(w http.ResponseWriter, req *http.Request) {
 
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "failed to create chirp");
+		return;
 	}
 
-	type successResponse struct {
-		ID        uuid.UUID `json:"id"`
-		CreatedAt time.Time `json:"created_at"`
-		UpdatedAt time.Time	`json:"updated_at"`
-		Body      string `json:"body"`
-		UserID    uuid.UUID `json:"user_id"`
-	}
+	
 
-	respondWithJSON(w, http.StatusCreated, successResponse{
+	respondWithJSON(w, http.StatusCreated, ChirpParsed{
 		ID: chirp.ID,
 		CreatedAt: chirp.CreatedAt,
 		UpdatedAt: chirp.UpdatedAt,

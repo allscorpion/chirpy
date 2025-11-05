@@ -49,7 +49,9 @@ func main() {
 	serveMux.HandleFunc("GET /admin/metrics", config.handlerMetrics);
 	serveMux.HandleFunc("POST /admin/reset", config.reset);
 	serveMux.HandleFunc("POST /api/users", config.handleCreateUser)
-	serveMux.HandleFunc("POST /api/chirps", config.handleChirps)
+	serveMux.HandleFunc("POST /api/chirps", config.handleChirpsCreate)
+	serveMux.HandleFunc("GET /api/chirps", config.handleChirpsGetAll)
+	serveMux.HandleFunc("GET /api/chirps/{chirpID}", config.handleChirpsGet)
 
 	server := http.Server{
 		Handler: serveMux,
