@@ -42,7 +42,7 @@ func (cfg *apiConfig) handleLogin(w http.ResponseWriter, req *http.Request) {
 		return;
 	}
 
-	jwt_token, err := auth.MakeJWT(user.ID, cfg.jwt_secret);
+	jwt_token, err := auth.MakeJWT(user.ID, cfg.env.jwt_secret);
 
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "failed to create token", err);

@@ -27,7 +27,7 @@ func (cfg *apiConfig) handleChirpsDelete(w http.ResponseWriter, req *http.Reques
 		return;
 	}
 
-	userId, err := auth.ValidateJWT(bearerToken, cfg.jwt_secret);
+	userId, err := auth.ValidateJWT(bearerToken, cfg.env.jwt_secret);
 
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "not authorized", err);

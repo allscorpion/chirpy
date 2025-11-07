@@ -14,11 +14,16 @@ import (
 	_ "github.com/lib/pq"
 )
 
+type apiConfigEnv struct {
+	platform string
+	jwt_secret string
+	polka_key string
+}
+
 type apiConfig struct {
 	fileserverHits atomic.Int32
 	dbQueries *database.Queries
-	platform string
-	jwt_secret string
+	env apiConfigEnv
 }
 
 type customUser struct {
@@ -29,6 +34,15 @@ type customUser struct {
 	IsChirpyRed bool `json:"is_chirpy_red"`
 }
 
+func getEnvVariable(key string) string {
+	val := os.Getenv(key);
+
+	if val == "" {
+		log.Fatalf("%v is not defined", key);
+	}
+
+	return val;
+}
 
 func main() {
 	err := godotenv.Load();
@@ -37,7 +51,7 @@ func main() {
 		log.Fatal("failed to load env");
 	}
 
-	dbURL := os.Getenv("DB_URL");
+	dbURL := getEnvVariable("DB_URL");
 
 	db, err := sql.Open("postgres", dbURL)
 
@@ -47,15 +61,20 @@ func main() {
 
 	dbQueries := database.New(db);
 
-	platform := os.Getenv("PLATFORM");
-	jwt_secret := os.Getenv("PLATFORM");
+	platform := getEnvVariable("PLATFORM");
+	jwt_secret := getEnvVariable("JWT_SECRET");
+	polka_key := getEnvVariable("POLKA_KEY");
 
 	serveMux := http.NewServeMux();
+	
 	config := apiConfig{
 		fileserverHits: atomic.Int32{}, 
 		dbQueries: dbQueries,
-		platform: platform,
-		jwt_secret: jwt_secret,
+		env: apiConfigEnv{
+			platform: platform,
+			jwt_secret: jwt_secret,
+			polka_key: polka_key,
+		},
 	};
 
 	serveMux.Handle("/app/", config.middlewareMetricsInc(http.StripPrefix("/app", http.FileServer(http.Dir(".")))));

@@ -31,7 +31,7 @@ func (cfg *apiConfig) handleRefresh(w http.ResponseWriter, req *http.Request) {
 		return;
 	}
 
-	accessToken, err := auth.MakeJWT(userWithTokenData.UserID, cfg.jwt_secret);
+	accessToken, err := auth.MakeJWT(userWithTokenData.UserID, cfg.env.jwt_secret);
 
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "failed to create access token", err);

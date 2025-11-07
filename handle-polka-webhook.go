@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/allscorpion/chirpy/internal/auth"
 	"github.com/allscorpion/chirpy/internal/database"
 	"github.com/google/uuid"
 )
@@ -16,6 +17,13 @@ func (cfg *apiConfig) handlePolkaWebook(w http.ResponseWriter, req *http.Request
 	type parameters struct {
 		Event string `json:"event"`
 		Data EventData `json:"data"`
+	}
+
+	apiKey, err := auth.GetAPIKey(req.Header);
+
+	if err != nil || apiKey != cfg.env.polka_key {
+		respondWithError(w, http.StatusUnauthorized, "unauthorized", err);
+		return;
 	}
 
 	decoder := json.NewDecoder(req.Body);
