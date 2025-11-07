@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/allscorpion/chirpy/internal/auth"
+	"github.com/allscorpion/chirpy/internal/database"
 	"github.com/google/uuid"
 )
 
@@ -12,19 +14,30 @@ func (cfg *apiConfig) handleCreateUser(w http.ResponseWriter, req *http.Request)
 	defer req.Body.Close();
 	type parameters struct {
         Email string `json:"email"`
+		Password string `json:"password"`
     }
 
 	decoder := json.NewDecoder(req.Body);
 	var params parameters;
 	if err := decoder.Decode(&params); err != nil {
-		respondWithError(w, 500, "Something went wrong");
+		respondWithError(w, 500, "Something went wrong", err);
 		return;
 	}
 
-	user, err := cfg.dbQueries.CreateUser(req.Context(), params.Email);
+	hash, err := auth.HashPassword(params.Password);
 
 	if err != nil {
-		respondWithError(w, 500, "failed to create user");
+		respondWithError(w, http.StatusInternalServerError, "failed to parse password", err);
+		return;
+	}
+
+	user, err := cfg.dbQueries.CreateUser(req.Context(), database.CreateUserParams{
+		Email: params.Email,
+		HashedPassword: hash,
+	});
+
+	if err != nil {
+		respondWithError(w, 500, "failed to create user", err);
 		return;
 	}
 

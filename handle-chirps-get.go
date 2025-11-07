@@ -13,14 +13,14 @@ func (cfg *apiConfig) handleChirpsGet(w http.ResponseWriter, req *http.Request) 
 	chirpId, err := uuid.Parse(req.PathValue("chirpID"));
 
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "invalid chirpID");
+		respondWithError(w, http.StatusBadRequest, "invalid chirpID", err);
 		return;
 	}
 
 	chirp, err := cfg.dbQueries.GetChirp(req.Context(), chirpId);
 
 	if err != nil {
-		respondWithError(w, http.StatusNotFound, "failed to get chirps");
+		respondWithError(w, http.StatusNotFound, "failed to get chirps", err);
 		return;
 	}
 

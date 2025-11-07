@@ -6,7 +6,11 @@ import (
 	"net/http"
 )
 
-func respondWithError(w http.ResponseWriter, statusCode int, errMsg string) {
+func respondWithError(w http.ResponseWriter, statusCode int, errMsg string, err error) {
+	if err != nil {
+		fmt.Printf("an error has occured %v\n", err);
+	}
+
 	type errorResponse struct {
 		Error string `json:"error"`
 	}

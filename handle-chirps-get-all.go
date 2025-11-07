@@ -11,7 +11,7 @@ func (cfg *apiConfig) handleChirpsGetAll(w http.ResponseWriter, req *http.Reques
 	chirps, err := cfg.dbQueries.GetAllChirps(req.Context());
 
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "failed to get chirps");
+		respondWithError(w, http.StatusInternalServerError, "failed to get chirps", err);
 		return;
 	}
 

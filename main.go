@@ -16,6 +16,7 @@ type apiConfig struct {
 	fileserverHits atomic.Int32
 	dbQueries *database.Queries
 	platform string
+	jwt_secret string
 }
 
 func main() {
@@ -35,13 +36,15 @@ func main() {
 
 	dbQueries := database.New(db);
 
-	platform := os.Getenv("PLATFORM")
+	platform := os.Getenv("PLATFORM");
+	jwt_secret := os.Getenv("PLATFORM");
 
 	serveMux := http.NewServeMux();
 	config := apiConfig{
 		fileserverHits: atomic.Int32{}, 
 		dbQueries: dbQueries,
 		platform: platform,
+		jwt_secret: jwt_secret,
 	};
 
 	serveMux.Handle("/app/", config.middlewareMetricsInc(http.StripPrefix("/app", http.FileServer(http.Dir(".")))));
@@ -49,9 +52,13 @@ func main() {
 	serveMux.HandleFunc("GET /admin/metrics", config.handlerMetrics);
 	serveMux.HandleFunc("POST /admin/reset", config.reset);
 	serveMux.HandleFunc("POST /api/users", config.handleCreateUser)
+	serveMux.HandleFunc("PUT /api/users", config.handleUserUpdate)
+	serveMux.HandleFunc("POST /api/login", config.handleLogin)
 	serveMux.HandleFunc("POST /api/chirps", config.handleChirpsCreate)
 	serveMux.HandleFunc("GET /api/chirps", config.handleChirpsGetAll)
 	serveMux.HandleFunc("GET /api/chirps/{chirpID}", config.handleChirpsGet)
+	serveMux.HandleFunc("POST /api/refresh", config.handleRefresh)
+	serveMux.HandleFunc("POST /api/revoke", config.handleRevoke)
 
 	server := http.Server{
 		Handler: serveMux,
