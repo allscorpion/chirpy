@@ -57,6 +57,7 @@ func main() {
 	serveMux.HandleFunc("POST /api/chirps", config.handleChirpsCreate)
 	serveMux.HandleFunc("GET /api/chirps", config.handleChirpsGetAll)
 	serveMux.HandleFunc("GET /api/chirps/{chirpID}", config.handleChirpsGet)
+	serveMux.HandleFunc("DELETE /api/chirps/{chirpID}", config.handleChirpsDelete)
 	serveMux.HandleFunc("POST /api/refresh", config.handleRefresh)
 	serveMux.HandleFunc("POST /api/revoke", config.handleRevoke)
 
