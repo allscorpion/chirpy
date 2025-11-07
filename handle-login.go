@@ -7,7 +7,6 @@ import (
 
 	"github.com/allscorpion/chirpy/internal/auth"
 	"github.com/allscorpion/chirpy/internal/database"
-	"github.com/google/uuid"
 )
 
 func (cfg *apiConfig) handleLogin(w http.ResponseWriter, req *http.Request) {
@@ -69,20 +68,20 @@ func (cfg *apiConfig) handleLogin(w http.ResponseWriter, req *http.Request) {
 	}
 
 	type successResponse struct {
-		ID        uuid.UUID `json:"id"`
-		CreatedAt time.Time `json:"created_at"`
-		UpdatedAt time.Time `json:"updated_at"`
-		Email     string `json:"email"`
+		customUser
 		Token     string `json:"token"`
 		RefreshToken string `json:"refresh_token"`
 	}
 
 	respondWithJSON(w, http.StatusOK, successResponse{
-		ID: user.ID,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
-		Email: user.Email,
 		Token: jwt_token,
 		RefreshToken: refreshToken,
+		customUser: customUser{
+			ID: user.ID,
+			CreatedAt: user.CreatedAt,
+			UpdatedAt: user.UpdatedAt,
+			Email: user.Email,
+			IsChirpyRed: user.IsChirpyRed,
+		},
 	});
 }

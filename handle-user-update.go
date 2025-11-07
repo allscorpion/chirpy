@@ -3,11 +3,9 @@ package main
 import (
 	"encoding/json"
 	"net/http"
-	"time"
 
 	"github.com/allscorpion/chirpy/internal/auth"
 	"github.com/allscorpion/chirpy/internal/database"
-	"github.com/google/uuid"
 )
 
 func (cfg *apiConfig) handleUserUpdate(w http.ResponseWriter, req *http.Request) {
@@ -56,17 +54,11 @@ func (cfg *apiConfig) handleUserUpdate(w http.ResponseWriter, req *http.Request)
 		return;
 	}
 
-	type successResponse struct {
-		ID        uuid.UUID `json:"id"`
-		CreatedAt time.Time `json:"created_at"`
-		UpdatedAt time.Time `json:"updated_at"`
-		Email     string `json:"email"`
-	}
-
-	respondWithJSON(w, http.StatusOK, successResponse{
+	respondWithJSON(w, http.StatusOK, customUser{
 		ID: user.ID,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
 		Email: user.Email,
+		IsChirpyRed: user.IsChirpyRed,
 	})
 }

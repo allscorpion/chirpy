@@ -6,8 +6,10 @@ import (
 	"net/http"
 	"os"
 	"sync/atomic"
+	"time"
 
 	"github.com/allscorpion/chirpy/internal/database"
+	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
@@ -18,6 +20,15 @@ type apiConfig struct {
 	platform string
 	jwt_secret string
 }
+
+type customUser struct {
+	ID        	uuid.UUID `json:"id"`
+	CreatedAt 	time.Time `json:"created_at"`
+	UpdatedAt 	time.Time `json:"updated_at"`
+	Email     	string `json:"email"`
+	IsChirpyRed bool `json:"is_chirpy_red"`
+}
+
 
 func main() {
 	err := godotenv.Load();
@@ -60,6 +71,7 @@ func main() {
 	serveMux.HandleFunc("DELETE /api/chirps/{chirpID}", config.handleChirpsDelete)
 	serveMux.HandleFunc("POST /api/refresh", config.handleRefresh)
 	serveMux.HandleFunc("POST /api/revoke", config.handleRevoke)
+	serveMux.HandleFunc("POST /api/polka/webhooks", config.handlePolkaWebook)
 
 	server := http.Server{
 		Handler: serveMux,
