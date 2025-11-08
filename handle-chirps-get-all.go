@@ -2,16 +2,28 @@ package main
 
 import (
 	"net/http"
+	"sort"
 
 	"github.com/allscorpion/chirpy/internal/database"
 	"github.com/google/uuid"
 )
 
+func getQueryParam(req *http.Request, key, defaultVal string) string {
+	val := req.URL.Query().Get(key);
+
+	if val == "" {
+		return defaultVal;
+	}
+
+	return val;
+}
+
 
 func (cfg *apiConfig) handleChirpsGetAll(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close();
 
-	author_id := req.URL.Query().Get("author_id");
+	author_id := getQueryParam(req, "author_id", "");
+	sort_query_param := getQueryParam(req, "sort", "asc");
 
 	var (
         chirps []database.Chirp
@@ -44,6 +56,12 @@ func (cfg *apiConfig) handleChirpsGetAll(w http.ResponseWriter, req *http.Reques
 			UpdatedAt: chirp.UpdatedAt,
 			Body: chirp.Body,
 			UserID: chirp.UserID,
+		});
+	}
+
+	if sort_query_param == "desc" {
+		sort.Slice(chirpsParsed, func(i, j int) bool {
+			return chirpsParsed[i].CreatedAt.After(chirpsParsed[j].CreatedAt)
 		});
 	}
 
